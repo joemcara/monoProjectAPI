@@ -1,0 +1,56 @@
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpass
+      MYSQL_DATABASE: b2b_orders
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: apppass
+    ports:
+      - "3307:3306"
+    volumes:
+      - ./db/schema.sql:/docker-entrypoint-initdb.d/01-schema.sql
+      - ./db/seed.sql:/docker-entrypoint-initdb.d/02-seed.sql
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      retries: 5
+
+  customers-api:
+    build: ./customers-api
+    ports:
+      - "3001:3001"
+    environment:
+      PORT: 3001
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: appuser
+      DB_PASSWORD: apppass
+      DB_NAME: b2b_orders
+      JWT_SECRET: supersecret
+      SERVICE_TOKEN: internal-service-token
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  orders-api:
+    build: ./orders-api
+    ports:
+      - "3002:3002"
+    environment:
+      PORT: 3002
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_USER: appuser
+      DB_PASSWORD: apppass
+      DB_NAME: b2b_orders
+      JWT_SECRET: supersecret
+      SERVICE_TOKEN: internal-service-token
+      CUSTOMERS_API_BASE: http://customers-api:3001
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+volumes:
+  mysql_data:

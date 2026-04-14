@@ -1,0 +1,127 @@
+openapi: 3.0.3
+info:
+  title: Lambda Orchestrator
+  description: Orchestrates order creation and confirmation across Customers and Orders APIs
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local (serverless-offline)
+
+paths:
+  /orchestrator/create-and-confirm-order:
+    post:
+      summary: Create and confirm an order in one step
+      description: |
+        Validates customer, creates order, confirms order with idempotency key,
+        and returns a consolidated JSON response.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrchestratorRequest'
+            example:
+              customer_id: 1
+              items:
+                - product_id: 2
+                  qty: 3
+              idempotency_key: abc-123
+              correlation_id: req-789
+      responses:
+        '201':
+          description: Order created and confirmed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrchestratorResponse'
+              example:
+                success: true
+                correlationId: req-789
+                data:
+                  customer:
+                    id: 1
+                    name: ACME
+                    email: ops@acme.com
+                    phone: "+1-555-0001"
+                  order:
+                    id: 101
+                    status: CONFIRMED
+                    total_cents: 389700
+                    items:
+                      - product_id: 2
+                        qty: 3
+                        unit_price_cents: 129900
+                        subtotal_cents: 389700
+        '400':
+          description: Validation error
+        '404':
+          description: Customer not found
+        '502':
+          description: Upstream service error
+
+components:
+  schemas:
+    OrchestratorRequest:
+      type: object
+      required: [customer_id, items, idempotency_key]
+      properties:
+        customer_id:
+          type: integer
+        items:
+          type: array
+          items:
+            type: object
+            required: [product_id, qty]
+            properties:
+              product_id:
+                type: integer
+              qty:
+                type: integer
+        idempotency_key:
+          type: string
+        correlation_id:
+          type: string
+
+    OrchestratorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+        correlationId:
+          type: string
+        data:
+          type: object
+          properties:
+            customer:
+              type: object
+              properties:
+                id:
+                  type: integer
+                name:
+                  type: string
+                email:
+                  type: string
+                phone:
+                  type: string
+            order:
+              type: object
+              properties:
+                id:
+                  type: integer
+                status:
+                  type: string
+                total_cents:
+                  type: integer
+                items:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      product_id:
+                        type: integer
+                      qty:
+                        type: integer
+                      unit_price_cents:
+                        type: integer
+                      subtotal_cents:
+                        type: integer

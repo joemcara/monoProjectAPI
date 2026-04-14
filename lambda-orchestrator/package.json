@@ -1,0 +1,22 @@
+{
+  "name": "lambda-orchestrator",
+  "version": "1.0.0",
+  "description": "Lambda Orchestrator for B2B Orders",
+  "main": "src/handler.js",
+  "scripts": {
+    "dev": "serverless offline",
+    "deploy": "serverless deploy",
+    "remove": "serverless remove"
+  },
+  "dependencies": {
+    "axios": "^1.7.7",
+    "express": "^4.21.0",
+    "jsonwebtoken": "^9.0.2",
+    "serverless-http": "^3.2.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.8.0"
+  }
+}

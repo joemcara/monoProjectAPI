@@ -1,0 +1,31 @@
+service: lambda-orchestrator
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs22.x
+  stage: ${opt:stage, 'dev'}
+  region: us-east-1
+  environment:
+    CUSTOMERS_API_BASE: ${env:CUSTOMERS_API_BASE, 'http://localhost:3001'}
+    ORDERS_API_BASE: ${env:ORDERS_API_BASE, 'http://localhost:3002'}
+    SERVICE_TOKEN: ${env:SERVICE_TOKEN, 'internal-service-token'}
+    JWT_SECRET: ${env:JWT_SECRET, 'supersecret'}
+
+functions:
+  orchestrator:
+    handler: src/handler.handler
+    events:
+      - http:
+          path: /orchestrator/create-and-confirm-order
+          method: post
+          cors: true
+
+plugins:
+  - serverless-offline
+
+custom:
+  serverless-offline:
+    httpPort: 3000
+    noPrependStageInUrl: true
