@@ -42,10 +42,11 @@ paths:
               properties:
                 username:
                   type: string
-                  example: admin
+                  example: your_username
                 password:
                   type: string
-                  example: admin123
+                  format: password
+                  example: your_password
       responses:
         '200':
           description: Login successful

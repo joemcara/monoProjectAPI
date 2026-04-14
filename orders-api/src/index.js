@@ -2,6 +2,9 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
+const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yamljs');
 
 const authRoutes = require('./routes/auth');
 const productRoutes = require('./routes/products');
@@ -10,9 +13,15 @@ const orderRoutes = require('./routes/orders');
 const app = express();
 const PORT = process.env.PORT || 3002;
 
+// Load OpenAPI spec
+const swaggerDocument = YAML.load(path.join(__dirname, '..', 'openapi.yaml'));
+
 app.use(cors());
-app.use(helmet());
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(express.json());
+
+// Swagger UI
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Health check
 app.get('/health', (req, res) => {
