@@ -47,7 +47,7 @@ async function searchProducts(req, res, next) {
     query += ' ORDER BY id ASC LIMIT ?';
     params.push(Number(limit) || 20);
 
-    const [rows] = await pool.execute(query, params);
+    const [rows] = await pool.query(query, params);
     const nextCursor = rows.length > 0 ? rows[rows.length - 1].id : null;
 
     res.json({ data: rows, nextCursor });
