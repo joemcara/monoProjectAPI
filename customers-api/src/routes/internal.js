@@ -6,7 +6,6 @@ const router = express.Router();
 
 router.use(serviceAuthMiddleware);
 
-// GET /internal/customers/:id — for inter-service consumption (Orders API, Lambda)
 router.get('/customers/:id', async (req, res, next) => {
   try {
     const [rows] = await pool.execute(
